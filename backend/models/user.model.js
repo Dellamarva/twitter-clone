@@ -53,7 +53,14 @@ const userSchema = new mongoose.Schema({
     link:{
         type: String,
         default: "",
-    }
+    },
+    likedPosts:[ //List of posts a user has liked
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Post",
+            default: [],
+        }
+    ]
 },{timestamps: true}); //Timestamps give "Created at" and "Updated at" field for a user
 
 //Model

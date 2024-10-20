@@ -19,7 +19,7 @@ export const getUserProfile = async (req, res) => {
         res.status(200).json(user); //Want all user data to display on profile when visiting
     } catch (error) {
         console.log("Error in getUserProfile: ", error.message);
-        res.status(500).json({error: error.message});
+        res.status(500).json({error: "Internal Server Error"});
     }
 }
 
@@ -66,7 +66,7 @@ export const followUnfollowUser = async (req, res) => {
 
     } catch (error) {
         console.log("Error in getUserProfile: ", error.message);
-        res.status(500).json({error: error.message});
+        res.status(500).json({error: "Internal Server Error"});
     }
 }
 
@@ -99,7 +99,7 @@ export const getSuggestedUsers = async (req, res) => {
 
     } catch (error) {
         console.log("Error in getSuggestedUsers: ", error.message);
-        res.status(500).json({error: error.message});
+        res.status(500).json({error: "Internal Server Error"});
     }
 }
 
@@ -174,6 +174,6 @@ export const updateUserProfile = async (req, res) => {
         return res.status(200).json(user); //send user back to client
     } catch (error) {
         console.log("Error in updateUserProfile: ", error.message);
-        res.status(500).json({error: error.message});
+        res.status(500).json({error: "Internal Server Error"});
     }
 }
