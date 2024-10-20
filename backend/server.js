@@ -8,6 +8,7 @@ import {v2 as cloudinary} from "cloudinary";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import postRoutes from "./routes/post.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 
 
 //Utility
@@ -34,7 +35,8 @@ app.use(cookieParser()); //Enables the ability to parse the cookie in the req ca
 
 app.use("/api/auth", authRoutes); //Signup, Login, Logout, getMe
 app.use("/api/users", userRoutes); //Profile, Suggested, Follow/Unfollow, Update Profile
-app.use("/api/post", postRoutes); //CreatePost, Like/Unlike, Comment, DeletePost
+app.use("/api/post", postRoutes); //CreatePost, Like/Unlike, Comment, DeletePost, getPosts, GetFollowingPosts, GetUserPosts, GetLikedPosts
+app.use("/api/notifications", notificationRoutes);
 
 //Create Port and connect to DB
 app.listen(PORT, () => {
