@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 function App() {
 
   const { data:authUser, isLoading, error, isError } = useQuery({ //Gets the user being logged in
-    queryKey: ['authUser'], //Give a unique name to the query and refer to it later
+    queryKey: ['authUser'], //Give a unique name to the query and refer to it later (authUser)
     queryFn: async() => {
       try {
         const res = await fetch("/api/auth/me"); //Fetch the user

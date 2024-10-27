@@ -4,7 +4,7 @@ import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
 
 const HomePage = () => {
-	const [feedType, setFeedType] = useState("forYou");
+	const [feedType, setFeedType] = useState("forYou"); 
 
 	return (
 		<>
@@ -36,8 +36,8 @@ const HomePage = () => {
 				{/*  CREATE POST INPUT */}
 				<CreatePost />
 
-				{/* POSTS */}
-				<Posts />
+				{/* POSTS : Check if endpoint is foryou or following */}
+				<Posts feedType={feedType} />
 			</div>
 		</>
 	);
