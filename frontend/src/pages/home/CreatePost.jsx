@@ -4,22 +4,49 @@ import { BsEmojiSmileFill } from "react-icons/bs";
 import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+
 const CreatePost = () => { //States
 	const [text, setText] = useState("");
 	const [img, setImg] = useState(null);
-
 	const imgRef = useRef(null);
 
-	const isPending = false;
-	const isError = false;
+	const {data:authUser} = useQuery({ queryKey: ['authUser']}); //Get authUser
+	const queryClient = useQueryClient();
 
-	const data = { //Profile Image
-		profileImg: "/avatars/boy1.png",
-	};
+	const { mutate:createPost, isPending, error, isError } = useMutation({ //Create Post mutation
+		mutationFn: async({text, img}) => {
+			try {
+				const res = await fetch("/api/post/create", { //Fetch the created post
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({text, img}), //Stringify the post for json
+				});
+				const data = await res.json(); //get post in json form
+				return data;
+			} catch (error) {
+				throw new Error(error);
+			}
+		},
+		onSuccess: () => {
+			//Reset to empty fields
+			setText("");
+			setImg(null);
+			toast.success("Post Created");
+			queryClient.invalidateQueries({queryKey: ['posts']}); //Update UI
+		}
+	});
+
+	// const data = { //Profile Image - Testing purposes
+	// 	profileImg: "/avatars/boy1.png",
+	// };
 
 	const handleSubmit = (e) => { //Submit
 		e.preventDefault();
-		alert("Post created successfully");
+		createPost({text, img});
 	};
 
 	const handleImgChange = (e) => { //Change Image handler
@@ -37,7 +64,7 @@ const CreatePost = () => { //States
 		<div className='flex p-4 items-start gap-4 border-b border-gray-700'>
 			<div className='avatar'>
 				<div className='w-8 rounded-full'>
-					<img src={data.profileImg || "/avatar-placeholder.png"} />
+					<img src={authUser.profileImg || "/avatar-placeholder.png"} />
 				</div>
 			</div>
 			<form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
@@ -73,7 +100,7 @@ const CreatePost = () => { //States
 						{isPending ? "Posting..." : "Post"}
 					</button>
 				</div>
-				{isError && <div className='text-red-500'>Something went wrong</div>}
+				{isError && <div className='text-red-500'>{error.message}</div>}
 			</form>
 		</div>
 	);
