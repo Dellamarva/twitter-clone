@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import LoadingSpinner from './LoadingSpinner.jsx';
+import { formatPostDate } from '../../utils/date';
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -16,6 +17,8 @@ const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
 	const { data: authUser } = useQuery({queryKey: ["authUser"]}); //get authUser
 	const queryClient = useQueryClient();
+	const postOwner = post.user;
+	const isLiked = post.likes.includes(authUser._id);
 
 	const {mutate:deletePost, isPending:isDeleting } = useMutation({ //Delete Post mutation
 		mutationFn: async () => {
@@ -58,7 +61,7 @@ const Post = ({ post }) => {
 		onSuccess: (updatedLikes) => {
 			//not great for UI design because it refetches all posts
 			//queryClient.invalidateQueries({queryKey:["posts"]});
-			
+
 			//instead, update cache directly for that post
 			queryClient.setQueryData(["posts"], (oldData) => { //Update likes on post without refetching
 				return oldData.map(p => {
@@ -72,16 +75,40 @@ const Post = ({ post }) => {
 		onError: (error) => {
 			toast.error(error.message);
 		}
-	})
+	});
 
-	const postOwner = post.user;
-	const isLiked = post.likes.includes(authUser._id);
+	const {mutate:commentPost, isPending:isCommenting} = useMutation({ //Comment mutation
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/post/comment/${post._id}`, { //fetch Comment
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ text: comment }),
+				}); 
+				const data = await res.json(); //turn comment into json
+				if (!res.ok) {
+					throw new Error(data.error || "Error commenting");
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		},
+		onSuccess: () => {
+			toast.success("Comment Posted");
+			setComment(""); //reset comment space after posting
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		}
+	});
 
 	const isMyPost = authUser._id === postOwner._id; //Check if owner of post matches authUser
 
-	const formattedDate = "1h";
-
-	const isCommenting = false;
+	const formattedDate = formatPostDate(post.createdAt);
 
 	const handleDeletePost = () => {
 		deletePost();
@@ -89,10 +116,12 @@ const Post = ({ post }) => {
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		if (isCommenting) return; //Optimization
+		commentPost();
 	};
 
 	const handleLikePost = () => {
-		if(isLiking) return;
+		if(isLiking) return; //Optimization
 		likePost();
 	};
 
