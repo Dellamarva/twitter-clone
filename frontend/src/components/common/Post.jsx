@@ -53,7 +53,7 @@ const Post = ({ post }) => {
 				if (!res.ok) {
 					throw new Error(data.error || "Something went wrong");
 				}
-				return data;
+				return data; //used in onSuccess
 			} catch (error) {
 				throw new Error(error.message);
 			}

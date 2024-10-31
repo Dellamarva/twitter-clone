@@ -1,36 +1,54 @@
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 
-const NotificationPage = () => {
-	const isLoading = false;
-	const notifications = [ //Hardcoded
-		{ 
-			_id: "1",
-			from: {
-				_id: "1",
-				username: "johndoe",
-				profileImg: "/avatars/boy2.png",
-			},
-			type: "follow",
-		},
-		{
-			_id: "2",
-			from: {
-				_id: "2",
-				username: "janedoe",
-				profileImg: "/avatars/girl1.png",
-			},
-			type: "like",
-		},
-	];
+import toast from "react-hot-toast";
 
-	const deleteNotifications = () => { //Delete Notifications
-		alert("All notifications deleted");
-	};
+const NotificationPage = () => {
+	const queryClient = useQueryClient();
+	const { data:notifications, isLoading } = useQuery({
+		queryKey: ["notifications"], //Give a unique name to the query and refer to it later (notifications)
+		queryFn: async() => {
+			try {
+				const res = await fetch("/api/notifications"); //Fetch notifications
+				const data = await res.json(); //put notifications in json format
+				if (!res.ok) {
+					throw new Error(data.error || "Error getting Notifications");
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		}
+	});
+
+	const { mutate: deleteNotifications } = useMutation({ //Delete notification mutation
+		mutationFn: async () => {
+			try {
+				const res = await fetch("/api/notifications", { //Fetch the notifications to delete
+					method: "DELETE",
+				});
+				const data = await res.json(); //turn notifications into json format
+				if (!res.ok) {
+					throw new Error(data.error || "Error deleting notifications");
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		},
+		onSuccess: () => {
+			toast.success("Notification Deleted");
+			queryClient.invalidateQueries({ queryKey: ["notifications"] }); //No refresh needed when deleting notifications
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		}
+	});
 
 	return (
 		<>
