@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from 'react-hot-toast';
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
 
 const EditProfileModal = ({authUser}) => {
 	const [formData, setFormData] = useState({ //Form State
@@ -14,37 +13,7 @@ const EditProfileModal = ({authUser}) => {
 		currentPassword: "",
 	});
 
-	const queryClient = useQueryClient();
-	const { mutate:updateProfile, isPending:isUpdatingProfile } = useMutation({ //Update Profile mutation
-		mutationFn: async () => {
-			try {
-				const res = await fetch(`/api/users/update`, { //Fetch the data to update
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData), //data changes to the profile
-				});
-				const data = await res.json(); //turn the data into json format
-				if (!res.ok) {
-					throw new Error(data.error || "Could not update profile");
-				}
-				return data;
-			} catch (error) {
-				throw new Error(error.message);
-			}
-		},
-		onSuccess: () => {
-			toast.success("Profile Updated Successfully");
-			Promise.all([ //Update the authUser and userProfile without refetching
-				queryClient.invalidateQueries({queryKey: ["authUser"]}),
-				queryClient.invalidateQueries({ queryKey: ["userProfile"]})
-			])
-		},
-		onError: (error) => {
-			toast.error(error.message);
-		}
-	});
+	const {updateProfile, isUpdatingProfile} = useUpdateUserProfile(); //Update profile mutation from hook
 
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,7 +48,7 @@ const EditProfileModal = ({authUser}) => {
 						className='flex flex-col gap-4'
 						onSubmit={(e) => {
 							e.preventDefault();
-							updateProfile();
+							updateProfile(formData);
 						}}
 					>
 						<div className='flex flex-wrap gap-2'>
