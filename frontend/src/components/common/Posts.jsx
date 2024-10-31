@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from 'react';
 
 
-const Posts = ({ feedType }) => { //Feedtype = foryou or following
+const Posts = ({ feedType, username, userId }) => { //Feedtype = foryou or following
 
 	const getPostEndpoint = () => { //Decide which page to display
 		switch (feedType) {
@@ -12,6 +12,10 @@ const Posts = ({ feedType }) => { //Feedtype = foryou or following
 				return "/api/post/all";
 			case "following":
 				return "/api/post/following";
+			case "posts":
+				return `/api/post/user/${username}` //pass username as a prop in ProfilePage
+			case "likes":
+				return `/api/post/likes/${userId}`; //pass userId as a prop in ProfilePage
 			default:
 				return "/api/post/all";
 		}
@@ -40,7 +44,7 @@ const Posts = ({ feedType }) => { //Feedtype = foryou or following
 
 	useEffect(() => { //Call when feedType changes
 		refetch();
-	}, [feedType, refetch]);
+	}, [feedType, refetch, username]);
 
 	return (
 		<>
