@@ -28,7 +28,7 @@ cloudinary.config({
 //Initialze App and Port
 const app = express();
 const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve()
+const __dirname = path.resolve();
 
 //Create Middle Layer (runs between req and res)
 app.use(express.json({limit: "5mb"})); //to parse req.body
