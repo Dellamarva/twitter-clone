@@ -1,4 +1,5 @@
 //Packages
+import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -27,6 +28,7 @@ cloudinary.config({
 //Initialze App and Port
 const app = express();
 const PORT = process.env.PORT || 5000;
+const __dirname = path.resolve()
 
 //Create Middle Layer (runs between req and res)
 app.use(express.json({limit: "5mb"})); //to parse req.body
@@ -37,6 +39,13 @@ app.use("/api/auth", authRoutes); //Signup, Login, Logout, getMe
 app.use("/api/users", userRoutes); //Profile, Suggested, Follow/Unfollow, Update Profile
 app.use("/api/post", postRoutes); //CreatePost, Like/Unlike, Comment, DeletePost, getPosts, GetFollowingPosts, GetUserPosts, GetLikedPosts
 app.use("/api/notifications", notificationRoutes);
+
+if (process.env.NODE_ENV === "production") { //For deployment
+    app.use(express.static(path.join(__dirname, "/frontend/dist")));
+    app.get("*", (req, res) => {
+        res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+    })
+}
 
 //Create Port and connect to DB
 app.listen(PORT, () => {
